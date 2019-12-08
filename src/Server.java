@@ -7,6 +7,8 @@ import java.util.Scanner;
 
 public class Server {
 
+    private static String inputServer;
+
     public static void main(String[] args) {
 
         ServerSocket server = null;
@@ -26,17 +28,22 @@ public class Server {
             fromServerStream = new DataOutputStream(socket.getOutputStream());
 
             //пишем от имени сервера
+            Socket finalSocket = socket;
+            ServerSocket finalServer = server;
             new Thread(() -> {
                 while (true) {
-
                     try {
                         Scanner serverScanner = new Scanner(System.in);
-                        String inputServer = serverScanner.nextLine();
+                        inputServer = serverScanner.nextLine();
                         if (inputServer.equals("/exit")) {
-                            System.out.println("Exit");
+                            fromServerStream.writeUTF("Сервер завершил работу");
+                            System.out.println("Завершение программы");
+                            finalSocket.close();
+                            finalServer.close();
                             System.exit(0);
+                        }else{
+                            fromServerStream.writeUTF(inputServer);
                         }
-                        fromServerStream.writeUTF(inputServer);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -45,14 +52,24 @@ public class Server {
             }).start();
 
             //принимаем то, что написал клиент
+
             new Thread(() -> {
 
                 while (true) {
 
                     try {
                         String clientMessage = clientStream.readUTF();
-                        System.out.println("Клиент: " + clientMessage);
-                    } catch (IOException e) {
+
+                        if (clientMessage.equalsIgnoreCase("Клиент отключился")){
+                            System.out.println("Клиент отключился. Сокеты закрыты. Сервер остановлен");
+                            finalSocket.close();
+                            finalServer.close();
+                            System.exit(0);
+                          } else {
+                            System.out.println("Клиент: " + clientMessage);
+                        }
+
+                    } catch ( Exception e) {
                         e.printStackTrace();
                     }
                 }

@@ -24,13 +24,15 @@ public class Client {
                 try {
                     while (true) {
                         Scanner clientScanner = new Scanner(System.in);
-//                        if (clientScanner.nextLine().equals("/exit")){
-//                            System.out.println("Выход из программы");
-//                            socket.close();
-//                            System.exit(0);
-//                        }
-                        String  clientMessage = clientScanner.nextLine();
-                        out.writeUTF(clientMessage);
+                        String clientMessage = clientScanner.nextLine();
+                        if (clientMessage.equals("/exit")){
+                            out.writeUTF("Клиент отключился");
+                            System.out.println("Выход из программы");
+                            socket.close();
+                            System.exit(0);
+                        } else {
+                            out.writeUTF(clientMessage);
+                        }
                      }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -41,7 +43,13 @@ public class Client {
                 try {
                     while (true) {
                        String serverMessage = in.readUTF();
-                       System.out.println("Сервер: " + serverMessage);
+                       if (serverMessage.equalsIgnoreCase("Сервер завершил работу")){
+                            socket.close();
+                            System.out.println("Сервер отключился. Работа Вашей программы так же остановлена \nСеанс связи окончен.");
+                            System.exit(0);
+                       } else {
+                           System.out.println("Сервер: " + serverMessage);
+                       }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
