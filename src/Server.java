@@ -71,6 +71,8 @@ public class Server {
 
                     } catch ( Exception e) {
                         e.printStackTrace();
+                        System.out.println("Клиент отключился. Сеанс связи завершен"); //к сожалению, не придумал как более корректно обработать ситуацию, когда клиент просто вышел
+                        System.exit(0);
                     }
                 }
             }).start();
